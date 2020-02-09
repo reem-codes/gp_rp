@@ -1,20 +1,40 @@
 import time
 import requests
+import datetime
 
 
 def main(BASE):
+    now = datetime.datetime.utcnow()
     url = BASE + "/command"
     resp = requests.get(url=url)
     data = resp.json()
-    print(data)
     for command in data:
+        print(command)
         if command["schedule_id"] is not None:  # != null
             url = BASE + "/schedule/" + str(command["schedule_id"])
             resp = requests.get(url=url)
             schedule = resp.json()
-            print(schedule)
-        else:
-            print(command["updateAt"])
+            schedule_time = datetime.datetime.strptime(schedule["time"], '%H:%M')
+            execution_time = datetime.datetime(now.year, now.month, now.day, schedule_time.hour, schedule_time.minute)
+            weekday = execution_time.today().weekday()
+            days = binary_to_position(bin(schedule["days"]))
+            if weekday in days and execution_time <= now:
+                    print("execute")
+        else:  # immediate command
+            datetime_object = datetime.datetime.strptime(command["updateAt"], '%a, %d %b %Y %H:%M:%S %Z')
+            if datetime_object <= now:
+                print("I am older")
+                # EXECUTE METHOD
+
+
+def binary_to_position(binary):
+    positions = []
+    for index, digit in enumerate(binary):
+        if index in [0, 1]:
+            continue
+        if int(digit) == 1:
+            positions.append(index-2)
+    return positions
 
 
 if __name__ == '__main__':
