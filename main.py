@@ -7,8 +7,13 @@ import RPi.GPIO as GPIO
 def execute(_gpio, _on):
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(_gpio, GPIO.OUT)
-    GPIO.output(_gpio, GPIO.HIGH if _on else GPIO.LOW)
-
+    print '..led on'
+    GPIO.output(_gpio, GPIO.LOW)
+    time.sleep(0.5)
+    print '..led off'
+    GPIO.output(_gpio, GPIO.HIGH)
+    time.sleep(0.5)
+    print("done")
 
 def main(BASE):
     now = datetime.datetime.utcnow()
@@ -51,7 +56,9 @@ def binary_to_position(binary):
 
 if __name__ == '__main__':
     SECONDS = 2
-    BASE = 'http://127.0.0.1:5000'
+    BASE = 'http://192.168.8.101:5000'
     while True:
         main(BASE)
         time.sleep(SECONDS)
+
+# Hello There
