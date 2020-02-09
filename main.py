@@ -1,6 +1,13 @@
 import time
 import requests
 import datetime
+import RPi.GPIO as GPIO
+
+
+def execute(_gpio, _on):
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(_gpio, GPIO.OUT)
+    GPIO.output(_gpio, GPIO.HIGH if _on else GPIO.LOW)
 
 
 def main(BASE):
@@ -8,6 +15,9 @@ def main(BASE):
     url = BASE + "/command"
     resp = requests.get(url=url)
     data = resp.json()
+    _gpio = 11  # data["hardware"]["gpio"]
+    _conf = True  # data["confgiguration"]["name"]
+
     for command in data:
         print(command)
         if command["schedule_id"] is not None:  # != null
@@ -20,11 +30,13 @@ def main(BASE):
             days = binary_to_position(bin(schedule["days"]))
             if weekday in days and execution_time <= now:
                     print("execute")
+                    execute(_gpio = _gpio, _on=_conf)
         else:  # immediate command
             datetime_object = datetime.datetime.strptime(command["updateAt"], '%a, %d %b %Y %H:%M:%S %Z')
             if datetime_object <= now:
                 print("I am older")
                 # EXECUTE METHOD
+                execute(_gpio=_gpio, _on=_conf)
 
 
 def binary_to_position(binary):
