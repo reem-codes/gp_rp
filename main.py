@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 import api_calls as api
 
 
-def execute(_gpio, _on, command_id):
+def execute(_gpio, _on, command_id, hw_id):
     """
 
     :param _gpio: the GPIO pin connected
@@ -25,7 +25,7 @@ def execute(_gpio, _on, command_id):
            "command_id": command_id
            }
     api.post_response(res)
-    api.put_hardware(_on)
+    api.put_hardware(hw_id, _on)
 
 
 def main():
@@ -36,6 +36,7 @@ def main():
 
     for command in data:  # looping through commands
 	print(command)	
+	hw_id = command["hardware_id"]
         _gpio = api.get_hardware(command["hardware_id"])["gpio"]
         _conf = command["configuration"]
         command_id = command["id"]
@@ -43,28 +44,23 @@ def main():
         if command["schedule_id"] is not None:  # if the command is scheduled (i.e. schedule_id != null)
             # GET schedule/<id> from the server and save it in schedule variable
             schedule = api.get_schedule(str(command["schedule_id"]))
-            print(schedule)
 	    # the schedule has a time string (e.x. "9:45 AM") and an integer from 0-126 representing the binary days
             schedule_time = datetime.datetime.strptime(schedule["time"], '%I:%M %p')  # time string into datetime object
             # turn the time string into today's date with the time given
             execution_time = datetime.datetime(now.year, now.month, now.day, schedule_time.hour, schedule_time.minute)
-            print(execution_time)
 	    # find today's weekday (e.x. sun, mon, tues)
             weekday = execution_time.today().weekday()
             # return the days of execution from the schedule
             days = binary_to_position('{0:07b}'.format(schedule["days"]))
-            # if the weekday is part of the execution days and the time is before now
-	    print(weekday)
- 	    print(days)
-            print(now)
+            # if the weekday is part of the execution days and the time is before no
             if weekday in days and execution_time <= now:
-                execute(_gpio=_gpio, _on=_conf, command_id=command_id)  # execute
+                execute(_gpio=_gpio, _on=_conf, command_id=command_id, hw_id=hw_id)  # execute
         else:  # immediate command
             # turn updateAt from string into datetime
             datetime_object = datetime.datetime.strptime(command["updateAt"], '%a, %d %b %Y %H:%M:%S %Z')
             if datetime_object <= now:  # if the execution time before now
                 # EXECUTE METHOD
-                execute(_gpio=_gpio, _on=_conf, command_id=command_id)
+                execute(_gpio=_gpio, _on=_conf, command_id=command_id, hw_id=hw_id)
 
 
 def binary_to_position(binary):
