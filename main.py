@@ -1,6 +1,7 @@
 import datetime
+import time
 from config import Config, config_extract
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import api_calls as api
 
 
@@ -9,12 +10,12 @@ def execute(_gpio, _on, command_id):
 
     :param _gpio: the GPIO pin connected
     :param _on: Whether to make it high or low
-    # """
+    """
     print("I'm executing..")
     print(_gpio, _on)
-    # GPIO.setmode(GPIO.BOARD)
-    # GPIO.setup(_gpio, GPIO.OUT)
-    # GPIO.output(_gpio, GPIO.LOW)
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(_gpio, GPIO.OUT)
+    GPIO.output(_gpio, GPIO.LOW if _on else GPIO.HIGH)
     # time.sleep(0.5)
     # GPIO.output(_gpio, GPIO.HIGH)
     # time.sleep(0.5)
@@ -81,8 +82,9 @@ if __name__ == '__main__':
         api.register()
     if Config.TOKEN == "":
         api.login()
-    main()
-
+    while True:
+	main()
+	time.sleep(Config.SECONDS)
 # while True:
 # main(Config.BASE)
 # time.sleep(Config.SECONDS)  # Time loop
