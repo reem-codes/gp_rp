@@ -63,3 +63,11 @@ def get_hardware(_id):
 def post_response(data):
     response = requests.post(Config.BASE + "/response", json=data, auth=BearerAuth()).json()
     print(response)
+
+
+def put_hardware(is_on):
+    data = {
+        "status": is_on
+    }
+    response = requests.put(Config.BASE + "/hardware", json=data, auth=BearerAuth()).json()
+    print(response)

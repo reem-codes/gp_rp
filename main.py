@@ -25,6 +25,7 @@ def execute(_gpio, _on, command_id):
            "command_id": command_id
            }
     api.post_response(res)
+    api.put_hardware(_on)
 
 
 def main():
